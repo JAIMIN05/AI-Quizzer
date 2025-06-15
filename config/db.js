@@ -1,18 +1,22 @@
-const { MongoClient } = require('mongodb');
+const mongoose = require('mongoose');
 
-const url = 'mongodb://localhost:27017/quizapp'; 
-const dbName = 'quizapp'; // Replace with your database name
-
-const connectToDatabase = async () => {
-    const client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
+const connectDB = async () => {
     try {
-        await client.connect();
-        console.log('Connected successfully to MongoDB');
-        return client.db(dbName);
+        if (!process.env.MONGO_URI) {
+            throw new Error('MongoDB URI is not defined in environment variables');
+        }
+
+        const conn = await mongoose.connect(process.env.MONGO_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            serverSelectionTimeoutMS: 5000
+        });
+
+        console.log(`MongoDB Connected: ${conn.connection.host}`);
     } catch (error) {
-        console.error('Error connecting to MongoDB:', error);
-        throw error;
+        console.error(`MongoDB Connection Error: ${error.message}`);
+        process.exit(1);
     }
 };
 
-module.exports = connectToDatabase;
+module.exports = connectDB;
