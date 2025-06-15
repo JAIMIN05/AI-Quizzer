@@ -4,6 +4,7 @@ const Submission = require('../models/submission.model');
 async function submitQuiz(req, res) {
     try {
         const { quizId, responses } = req.body;
+        const userId = req.user.id; // Get userId from JWT token
 
         // Validate input
         if (!quizId || !responses || !Array.isArray(responses)) {
@@ -47,14 +48,12 @@ async function submitQuiz(req, res) {
 
         // Calculate statistics
         const total = quiz.questions.length;
-        const correctCount = score;
-        const wrongCount = total - score;
         const percentage = (score / total) * 100;
 
-        // Create submission record
+        // Create submission record with userId
         const submission = new Submission({
             quizId,
-            userId: req.user?.id || 'anonymous', // If you have authentication
+            userId, // Store the userId from JWT
             responses,
             score,
             total,
@@ -64,16 +63,17 @@ async function submitQuiz(req, res) {
         await submission.save();
 
         // Return detailed results
-        res.json({
+        res.status(201).json({
             success: true,
             data: {
+                submissionId: submission._id,
+                userId,
                 score,
                 total,
                 percentage: percentage.toFixed(2),
-                correctCount,
-                wrongCount,
-                questionResults,
-                submissionId: submission._id
+                correctCount: score,
+                wrongCount: total - score,
+                questionResults
             }
         });
 

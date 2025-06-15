@@ -4,10 +4,10 @@ const redisService = require('../services/redis.service');
 
 async function getQuizHistory(req, res) {
     try {
-        const { grade, subject, minScore, from, to } = req.query;
+        const { grade, subject, minScore, from, to, userId } = req.query;
 
-        // Generate cache key from query parameters
-        const cacheKey = `quizHistory:${JSON.stringify(req.query)}`;
+        // Generate cache key including userId if provided
+        const cacheKey = `quizHistory:${userId || 'all'}:${JSON.stringify(req.query)}`;
 
         // Check cache first
         const cachedResult = await redisService.getCachedHistory(cacheKey);
@@ -22,6 +22,11 @@ async function getQuizHistory(req, res) {
         // Build query filters
         const filters = {};
         
+        // Add userId filter if provided
+        if (userId) {
+            filters.userId = userId;
+        }
+
         // Add date range filters if provided
         if (from || to) {
             filters.submittedAt = {};
@@ -61,6 +66,7 @@ async function getQuizHistory(req, res) {
             return {
                 submissionId: submission._id,
                 quizId: submission.quizId,
+                userId: submission.userId, // Include userId in response
                 submittedAt: submission.submittedAt,
                 score: submission.score,
                 total: submission.total,
