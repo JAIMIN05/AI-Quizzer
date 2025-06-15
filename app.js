@@ -4,6 +4,7 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth.routes');
 const quizRoutes = require('./routes/quiz.routes');
 const submissionRoutes = require('./routes/submission.routes');
+const quizHistoryRoutes = require('./routes/quiz.routes');
 
 // Verify environment variables
 if (!process.env.MONGO_URI) {
@@ -23,6 +24,7 @@ app.use(express.json());
 app.use('/auth', authRoutes);
 app.use('/quiz', quizRoutes);
 app.use('/quiz', submissionRoutes);
+app.use('/quiz', quizHistoryRoutes);
 
 const PORT = process.env.PORT || 3000;
 
