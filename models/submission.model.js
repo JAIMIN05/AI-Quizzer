@@ -32,6 +32,14 @@ const submissionSchema = new mongoose.Schema({
     submittedAt: {
         type: Date,
         default: Date.now
+    },
+    isRetry: {
+        type: Boolean,
+        default: false
+    },
+    originalSubmissionId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Submission'
     }
 });
 
