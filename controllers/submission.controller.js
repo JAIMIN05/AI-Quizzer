@@ -1,10 +1,12 @@
 const Quiz = require('../models/quiz.model');
 const Submission = require('../models/submission.model');
+const { sendQuizResults } = require('../services/email.service');
 
 async function submitQuiz(req, res) {
     try {
         const { quizId, responses } = req.body;
         const userId = req.user.id; // Get userId from JWT token
+        const userEmail = req.user.email; // Get email from JWT payload
 
         // Validate input
         if (!quizId || !responses || !Array.isArray(responses)) {
@@ -61,6 +63,19 @@ async function submitQuiz(req, res) {
         });
 
         await submission.save();
+
+        // Prepare results for email
+        const quizResults = {
+            score,
+            total: quiz.questions.length,
+            correctAnswers: questionResults.filter(q => q.isCorrect),
+            wrongAnswers: questionResults.filter(q => !q.isCorrect)
+        };
+
+        // Send email asynchronously
+        sendQuizResults(userEmail, quizResults).catch(error => {
+            console.error('Email sending failed:', error);
+        });
 
         // Return detailed results
         res.status(201).json({

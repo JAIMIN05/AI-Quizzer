@@ -3,13 +3,22 @@ const { v4: uuidv4 } = require('uuid');
 
 const login = (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { username, email, password } = req.body;
 
         // Basic validation
-        if (!username || !password) {
+        if (!username || !password || !email) {
             return res.status(400).json({
                 success: false,
-                message: 'Username and password are required'
+                message: 'Username, email and password are required'
+            });
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid email format'
             });
         }
 
@@ -20,6 +29,7 @@ const login = (req, res) => {
         const payload = {
             id: userId,
             username: username,
+            email: email,
             timestamp: Date.now()
         };
 
@@ -30,11 +40,11 @@ const login = (req, res) => {
             { expiresIn: '1h' }
         );
 
-        // Return token and userId
         res.json({
             success: true,
             data: {
                 userId,
+                email,
                 token
             }
         });
