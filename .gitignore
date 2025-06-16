@@ -1,2 +1,16 @@
-/node_modules   
+# Dependencies
+node_modules/
+
+# Environment variables
 .env
+
+# Docker volumes
+mongodb_data/
+redis_data/
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
